@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google" content="notranslate" />
+  <title>Awareness Memory on T3N</title>
+  <style>
+    :root { --bg:#070b12; --panel:#0e1624; --panel2:#121d2e; --line:#223148; --text:#e8eef8; --muted:#8aa0bd; --teal:#5ce0d2; --ink:#062a2a; --ok:#34d399; --err:#f87171; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(900px 500px at 12% -10%, rgba(92,224,210,.10), transparent 60%), var(--bg); color:var(--text); font:14px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    header { max-width:1000px; margin:0 auto; padding:30px 24px 10px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .brand { display:flex; align-items:center; gap:14px; }
+    .mark { width:44px; height:44px; display:grid; place-items:center; border-radius:14px; background:linear-gradient(160deg,#5ce0d2,#2f9d98); color:#052220; font-weight:800; font-size:20px; box-shadow:0 10px 30px rgba(92,224,210,.25); }
+    h1 { margin:0; font-size:19px; }
+    .brand p { margin:2px 0 0; color:var(--muted); font-size:12px; }
+    .badge { padding:6px 12px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:11px; }
+    main { max-width:1000px; margin:0 auto; padding:8px 24px 40px; display:grid; gap:18px; }
+    .card { padding:22px; background:linear-gradient(180deg, rgba(18,29,46,.92), rgba(14,22,36,.92)); border:1px solid var(--line); border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,.25); }
+    h2 { margin:0 0 4px; font-size:16px; }
+    .hint { margin:0 0 14px; color:var(--muted); font-size:12px; }
+    .row { display:flex; gap:10px; align-items:center; }
+    button { padding:10px 16px; border:0; border-radius:10px; background:var(--teal); color:var(--ink); font:inherit; font-weight:650; font-size:13px; cursor:pointer; }
+    button:disabled { opacity:.55; cursor:default; }
+    pre { margin:14px 0 0; padding:16px; min-height:220px; max-height:480px; overflow:auto; background:#060a10; border:1px solid var(--line); border-radius:12px; color:#cbd8ea; font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace; white-space:pre-wrap; word-break:break-word; }
+    .state { margin-top:10px; min-height:18px; color:var(--muted); font-size:12px; }
+    .state.ok { color:var(--ok); } .state.err { color:var(--err); }
+    .flow { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:6px 0 16px; }
+    .step { padding:12px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; font-size:12px; color:var(--muted); }
+    .step b { display:block; color:var(--text); font-size:13px; margin-bottom:2px; }
+    footer { max-width:1000px; margin:0 auto; padding:0 24px 30px; display:flex; justify-content:space-between; gap:16px; color:#5e7592; font-size:11px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="mark">A</span>
+      <div>
+        <h1>Awareness Memory on T3N</h1>
+        <p>Durable agent memory, sealed in a confidential tenant</p>
+      </div>
+    </div>
+    <span class="badge">Terminal 3 · testnet</span>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Seal an Awareness memory into T3N</h2>
+      <p class="hint">Reads a real memory from the local Awareness daemon, writes it into the tenant's private KV map, and reads it back.</p>
+      <div class="flow">
+        <div class="step"><b>1. Authenticate</b>Ethereum-signed T3N session, tenant DID read from the network.</div>
+        <div class="step"><b>2. Private map</b><code>z:&lt;tid&gt;:awareness-memory</code>, owner-only ACL.</div>
+        <div class="step"><b>3. Seal + read</b>Awareness memory entry set, then fetched back.</div>
+      </div>
+      <div class="row">
+        <button id="run">Seal memory into T3N</button>
+        <span class="hint" style="margin:0">key stays server-side</span>
+      </div>
+      <div class="state" id="state"></div>
+      <pre id="out">Waiting to run…</pre>
+    </section>
+  </main>
+
+  <footer>
+    <span>Awareness (durable memory) → T3N tenant KV (confidential storage)</span>
+    <span>The agent never sees the TEE internals.</span>
+  </footer>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    $("run").addEventListener("click", async () => {
+      const btn = $("run");
+      btn.disabled = true;
+      $("state").className = "state";
+      $("state").textContent = "Running T3N session… (handshake + map + read)";
+      $("out").textContent = "";
+      try {
+        const res = await fetch("/api/run");
+        const data = await res.json();
+        $("out").textContent = data.output || "(no output)";
+        $("state").className = "state " + (data.ok ? "ok" : "err");
+        $("state").textContent = data.ok ? "Done" : "Run failed (see output)";
+      } catch (err) {
+        $("state").className = "state err";
+        $("state").textContent = String(err);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

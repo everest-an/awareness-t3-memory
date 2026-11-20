@@ -1,0 +1,18 @@
+{
+  "name": "awareness-t3-memory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Seal durable Awareness memory into a Terminal 3 confidential tenant KV map.",
+  "license": "MIT",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "@terminal3/t3n-sdk": "latest"
+  },
+  "devDependencies": {
+    "tsx": "latest"
+  }
+}
